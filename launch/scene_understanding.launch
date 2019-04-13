@@ -1,0 +1,7 @@
+<!-- Main launch file for scene understanding module -->
+
+<launch>
+
+    <node name="scene_understanding" pkg="scene_understanding" type="scene_understanding_wrapper.py" /> 
+
+</launch>
