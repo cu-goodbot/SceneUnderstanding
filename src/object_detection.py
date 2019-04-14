@@ -1,5 +1,5 @@
-from model.models import *
-from utils import *
+from src.model.models import *
+from src.utils import *
 
 import os, sys, time, datetime, random
 import torch
@@ -13,9 +13,9 @@ from PIL import Image
 
 
 def configuration():
-    config_path='../config/yolov3.cfg'
-    weights_path='../config/yolov3.weights'
-    class_path='../config/coco.names'
+    config_path='config/yolov3.cfg'
+    weights_path='config/yolov3.weights'
+    class_path='config/coco.names'
     img_size=416
     conf_thres=0.8
     nms_thres=0.4
@@ -92,6 +92,8 @@ def draw_bounding_box(img_path):
     unpad_h = img_size - pad_y
     unpad_w = img_size - pad_x
 
+    detected_objects = []
+
     if detections is not None:
         unique_labels = detections[:, -1].cpu().unique()
         n_cls_preds = len(unique_labels)
@@ -100,7 +102,7 @@ def draw_bounding_box(img_path):
 
         i = 0
 
-        detected_objects = []
+
         for x1, y1, x2, y2, conf, cls_conf, cls_pred in detections:
             if i >= 0 and i <= 5:
                 box_h = ((y2 - y1) / unpad_h) * img.shape[0]
@@ -144,6 +146,6 @@ def draw_bounding_box(img_path):
 # the below function return the detection, where each row is <x1, y1, x2, y2, conf, cls_conf, cls_pred>
 # the first four elements are the x1, y1, x2, y2 coordinates.
 
-detected_objs = draw_bounding_box('../images/blueangels.jpg')
+detected_objs = draw_bounding_box('images/gibson_chair_rgb.jpg')
 print(detected_objs)
 
