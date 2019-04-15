@@ -10,6 +10,7 @@ from std_msgs.msg import String
 from sensor_msgs.msg import Image
 
 from scene_understanding.msg import DetectedObject, Scene
+from src.object_detection import obstacle_detector
 
 # TODO: change to param loaded from config file
 UPDATE_RATE = 1.0 # [Hz]

@@ -1,2 +1,6 @@
 *.pyc
 *.weights
+.DS_Store
+.idea/*
+.idea/
+src/.DS_Store

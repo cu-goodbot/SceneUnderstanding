@@ -1,3 +1,5 @@
+from pprint import pprint
+
 from src.model.models import *
 from src.utils import *
 
@@ -140,12 +142,78 @@ def draw_bounding_box(img_path):
     return detected_objects
 
 
-# call this function with the image path.. it will do rest of the things.
-# runs with CPU and GPU both.
-# once sample example is shown below.
-# the below function return the detection, where each row is <x1, y1, x2, y2, conf, cls_conf, cls_pred>
-# the first four elements are the x1, y1, x2, y2 coordinates.
+# Function to estimate depths of all the found objects.
+def estimate_objects_distance(detected_objects, depth_map, depth_map_image = False, depth_scaling = 1.0):
+    '''
+    :param detected_objects: List of dict with object name and diagonal coordinates
+    :param depth_map: 2D depth array of the corresponding image
+    :param depth_map_image: Boolean flag to show if the depth map is in the form of image
+    :return: List of objects from nearest to furthest with estimated distance
+    '''
+    depth_map_np = depth_map
+    if depth_map_image:
+        import cv2
+        depth_map_np = cv2.imread(depth_map, 0)
+    depth_map_np = depth_map_np * depth_scaling
+    height, width = depth_map_np.shape
+    objects = []
 
-detected_objs = draw_bounding_box('images/gibson_chair_rgb.jpg')
-print(detected_objs)
+    for i, obj in enumerate(detected_objects):
+        new_obj = {}
+        new_obj['label'] = obj['name']
+        new_obj['bounding_box_corners'] = [int(obj['tlx']), int(obj['tly']),
+                                           int(obj['brx']), int(obj['bry'])]
+        new_obj['bounding_box_center'] = [int(obj['tlx']+obj['brx']) / 2,
+                                          int(obj['tly'] + obj['bry']) / 2]
+
+        relevant_depth_map = depth_map_np[height-int(obj['bry']):height-int(obj['tly']),
+                             int(obj['tlx']):int(obj['brx'])]
+
+        # If this is not good enough, we can use clustering to
+        # find a better depth estimate for the object
+        new_obj['depth'] = relevant_depth_map.min()
+        objects.append(new_obj.copy())
+        # Uncomment to save each depth bounding box
+        # from matplotlib import pyplot as plt
+        # plt.imshow(relevant_depth_map, interpolation='nearest')
+        # plt.gray()
+        # plt.savefig('relevant_depth_map_' + str(i) + '.png')
+    return sorted(objects, key=lambda x: x['depth'])
+
+
+# The main driver function to call the object detector and depth estimator
+def obstacle_detector(image, depth_map, depth_scaling = 1.0):
+    '''
+    :param image: RGB image path
+    :param depth_map: 2D numpy array with depth info
+    :param depth_scaling: Appropriate scaling factor for depth
+    :return: List of dicts representing the detected obstacle in sorted order
+    '''
+    detected_objs = draw_bounding_box(image)
+
+    objects = estimate_objects_distance(detected_objs,
+                                        depth_map,
+                                        depth_map_image=False,
+                                        depth_scaling=depth_scaling)
+    return objects
+
+
+
+if __name__ == "__main__":
+
+    # call this function with the image path.. it will do rest of the things.
+    # runs with CPU and GPU both.
+    # once sample example is shown below.
+    # the below function return the detection, where each row is <x1, y1, x2, y2, conf, cls_conf, cls_pred>
+    # the first four elements are the x1, y1, x2, y2 coordinates.
+
+    detected_objs = draw_bounding_box('images/indoor_1.jpg')
+    print(detected_objs)
+
+    objects = estimate_objects_distance(detected_objs,
+                              'images/indoor_1_depth.png',
+                              depth_map_image = True,
+                              depth_scaling = 0.1)
+    pprint(objects)
+
 
