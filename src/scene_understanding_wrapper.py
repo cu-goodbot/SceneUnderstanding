@@ -26,10 +26,10 @@ class SUWrapper(object):
         rospy.init_node('scene_understanding')
 
         # create publishers and subscribers
-        rospy.Subscriber('/image_raw',Image,self.rgb_image_cb)
-        rospy.Subscriber('/depth_image',Image,self.depth_image_cb)
+        rospy.Subscriber('/image_raw', Image, self.rgb_image_cb)
+        rospy.Subscriber('/depth_image', Image, self.depth_image_cb)
 
-        pub = rospy.Publisher('/scene_info',Scene,queue_size=10)
+        pub = rospy.Publisher('/scene_info', Scene, queue_size=10)
 
         # TODO: instantiate scene understanding module
 
@@ -39,8 +39,9 @@ class SUWrapper(object):
 
             # run detector update
             # data = self.detector.update(self.recent_rgb,self.recent_depth)
-            data = [{'label': 'chair','bounding_box_corners': [-10,10,-10,10], 'bounding_box_center': [0,0], 'depth': 2.5634}, 
-                    {'label': 'door', 'bounding_box_corners': [-20,20,-20,20], 'bounding_box_center': [1,1], 'depth': 4.8789}]
+            data = obstacle_detector(self.recent_rgb, self.recent_depth)
+            # data = [{'label': 'chair','bounding_box_corners': [-10,10,-10,10], 'bounding_box_center': [0,0], 'depth': 2.5634},
+            #         {'label': 'door', 'bounding_box_corners': [-20,20,-20,20], 'bounding_box_center': [1,1], 'depth': 4.8789}]
 
             # create msg and publish update
             msg = self.gen_scene_msg(data)
