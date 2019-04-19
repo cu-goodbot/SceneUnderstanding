@@ -35,8 +35,8 @@ class SUWrapper(object):
         rospy.init_node('scene_understanding')
 
         # create publishers and subscribers
-        rospy.Subscriber('/image_raw', Image, self.rgb_image_cb)
-        rospy.Subscriber('/depth_image', Image, self.depth_image_cb)
+        rospy.Subscriber('/kinect2/qhd/image_color', Image, self.rgb_image_cb)
+        rospy.Subscriber('/kinect2/sd/image_depth', Image, self.depth_image_cb)
 
         pub = rospy.Publisher('/scene_info', Scene, queue_size=10)
 

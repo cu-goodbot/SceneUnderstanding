@@ -28,7 +28,10 @@ def configuration():
 
     # define the device to run the model
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print("Device = " + str(device))
     model.to(device)
+    # The test image is not correctly put on GPU so pivoting back on CPU for the moment
+    model.to('cpu')
 
     # model.cpu()
     model.eval()
