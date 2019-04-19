@@ -1,7 +1,8 @@
+from __future__ import division
 from pprint import pprint
 
-from src.model.models import *
-from src.utils import *
+from model.models import *
+from utils import *
 
 import os, sys, time, datetime, random
 import torch
@@ -49,8 +50,8 @@ def detect_image(img, img_size, Tensor, model):
     nms_thres = 0.4
 
     ratio = min(img_size/img.size[0], img_size/img.size[1])
-    imw = round(img.size[0] * ratio)
-    imh = round(img.size[1] * ratio)
+    imw = int(round(img.size[0] * ratio))
+    imh = int(round(img.size[1] * ratio))
     img_transforms = transforms.Compose([ transforms.Resize((imh, imw)),
          transforms.Pad((max(int((imh-imw)/2),0), max(int((imw-imh)/2),0), max(int((imh-imw)/2),0), max(int((imw-imh)/2),0)),
                         (128,128,128)),
@@ -84,7 +85,7 @@ def draw_bounding_box(img_path):
     print('Inference Time: %s' % (inference_time))
 
     # Get bounding-box colors
-    cmap = plt.get_cmap('tab20b')
+    cmap = plt.get_cmap('jet')
     colors = [cmap(i) for i in np.linspace(0, 1, 20)]
 
     img = np.array(img)
@@ -137,10 +138,10 @@ def draw_bounding_box(img_path):
                 detected_objects.append(obj)
 
             i += 1
-    plt.axis('off')
-    # save image
-    plt.savefig(img_path.replace(".jpg", "-det.jpg"), bbox_inches='tight', pad_inches=0.0)
-    plt.show()
+    # plt.axis('off')
+    # # save image
+    # plt.savefig(img_path.replace(".jpg", "-det.jpg"), bbox_inches='tight', pad_inches=0.0)
+    # plt.show()
 
     return detected_objects
 
