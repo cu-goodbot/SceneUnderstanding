@@ -49,16 +49,18 @@ class SUWrapper(object):
         rate = rospy.Rate(UPDATE_RATE)
         while not rospy.is_shutdown():
 
-            # convert most recent rgb and depth images to numpy arrays
-            rgb_array = bridge.imgmsg_to_cv2(self.recent_rgb,desired_encoding="rgb8")
-            depth_array = bridge.imgmsg_to_cv2(self.recent_depth,desired_encoding="passthrough")
+            if (self.recent_rgb is not None) and (self.recent_depth is not None):
 
-            # run detector update
-            data = obstacle_detector(rgb_array, depth_array)
+                # convert most recent rgb and depth images to numpy arrays
+                rgb_array = bridge.imgmsg_to_cv2(self.recent_rgb,desired_encoding="rgb8")
+                depth_array = bridge.imgmsg_to_cv2(self.recent_depth,desired_encoding="passthrough")
 
-            # create msg and publish update
-            msg = self.gen_scene_msg(data)
-            pub.publish(msg)
+                # run detector update
+                data = obstacle_detector(rgb_array, depth_array)
+
+                # create msg and publish update
+                msg = self.gen_scene_msg(data)
+                pub.publish(msg)
 
             # sleep until next update
             rate.sleep()
