@@ -160,14 +160,21 @@ def estimate_objects_distance(detected_objects, depth_map, depth_map_image = Fal
     '''
     global image_size
     depth_map_np = depth_map
+
+    FOV_width = 84
+
     if depth_map_image:
         import cv2
         depth_map_np = cv2.imread(depth_map, 0)
     depth_map_np = depth_map_np * depth_scaling
 
     height, width = image_size[:2]
+    pixels_per_degree = float(width)/FOV_width
+
     height_ratio_with_rgb = depth_map_np.shape[0]/image_size[0]
     width_ratio_with_rgb = depth_map_np.shape[1] / image_size[1]
+    image_center = float(width)/2
+
     objects = []
 
 
@@ -178,6 +185,7 @@ def estimate_objects_distance(detected_objects, depth_map, depth_map_image = Fal
                                            int(obj['brx']), int(obj['bry'])]
         new_obj['bounding_box_center'] = [int(obj['tlx']+obj['brx']) / 2,
                                           int(obj['tly'] + obj['bry']) / 2]
+        new_obj['angle'] = (new_obj['bounding_box_corners'][0] - image_center) / pixels_per_degree
 
         row_start = int(height_ratio_with_rgb*(int(obj['tly'])))
         row_start = row_start if row_start > 0 else 0
