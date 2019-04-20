@@ -14,11 +14,12 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from PIL import Image
 
+image_size = None
 
 def configuration():
-    config_path='config/yolov3.cfg'
-    weights_path='config/yolov3.weights'
-    class_path='config/coco.names'
+    config_path=os.path.abspath(os.path.join(os.path.dirname(__file__),'config/yolov3.cfg'))
+    weights_path=os.path.abspath(os.path.join(os.path.dirname(__file__),'config/yolov3.weights'))
+    class_path=os.path.abspath(os.path.join(os.path.dirname(__file__),'config/coco.names'))
     img_size=416
     conf_thres=0.8
     nms_thres=0.4
@@ -69,13 +70,16 @@ def detect_image(img, img_size, Tensor, model):
 
 
 def draw_bounding_box(img_path):
+    global image_size
     # load image and get detections
     # img_path = "images/blueangels.jpg"
 
     img_size, Tensor, model, classes = configuration()
 
     prev_time = time.time()
-    img = Image.open(img_path)
+    # img = Image.open(img_path)
+    img = Image.fromarray(img_path)
+    image_size = img_path.shape
     detections = detect_image(img, img_size, Tensor, model)
 
     # testers
@@ -154,13 +158,18 @@ def estimate_objects_distance(detected_objects, depth_map, depth_map_image = Fal
     :param depth_map_image: Boolean flag to show if the depth map is in the form of image
     :return: List of objects from nearest to furthest with estimated distance
     '''
+    global image_size
     depth_map_np = depth_map
     if depth_map_image:
         import cv2
         depth_map_np = cv2.imread(depth_map, 0)
     depth_map_np = depth_map_np * depth_scaling
-    height, width = depth_map_np.shape
+
+    height, width = image_size[:2]
+    height_ratio_with_rgb = depth_map_np.shape[0]/image_size[0]
+    width_ratio_with_rgb = depth_map_np.shape[1] / image_size[1]
     objects = []
+
 
     for i, obj in enumerate(detected_objects):
         new_obj = {}
@@ -170,18 +179,37 @@ def estimate_objects_distance(detected_objects, depth_map, depth_map_image = Fal
         new_obj['bounding_box_center'] = [int(obj['tlx']+obj['brx']) / 2,
                                           int(obj['tly'] + obj['bry']) / 2]
 
-        relevant_depth_map = depth_map_np[height-int(obj['bry']):height-int(obj['tly']),
-                             int(obj['tlx']):int(obj['brx'])]
+        row_start = int(height_ratio_with_rgb*(int(obj['tly'])))
+        row_start = row_start if row_start > 0 else 0
+        row_end = int(height_ratio_with_rgb*(int(obj['bry'])))
+        row_end = row_end if row_end > 0 else 0
+        column_start = int(width_ratio_with_rgb*obj['tlx'])
+        column_start = column_start if column_start > 0 else 0
+        column_end = int(width_ratio_with_rgb*obj['brx'])
+        column_end = column_end if column_end > 0 else 0
+
+        relevant_depth_map = depth_map_np[row_start:row_end, column_start:column_end]
+        print(obj)
+        print("Height = " + str(height), width)
+        print(int(height_ratio_with_rgb*(int(obj['tly']))),
+                                          int(height_ratio_with_rgb*(int(obj['bry']))),
+                             int(width_ratio_with_rgb*obj['tlx']),int(width_ratio_with_rgb*obj['brx']))
+        print(depth_map_np.shape)
+        # print("path: ",relevant_depth_map)
 
         # If this is not good enough, we can use clustering to
         # find a better depth estimate for the object
+        relevant_depth_map = relevant_depth_map[relevant_depth_map > 10]
         new_obj['depth'] = relevant_depth_map.min()
         objects.append(new_obj.copy())
         # Uncomment to save each depth bounding box
-        # from matplotlib import pyplot as plt
+        # plt.clf()
+        # plt.title(obj['name'])
         # plt.imshow(relevant_depth_map, interpolation='nearest')
         # plt.gray()
-        # plt.savefig('relevant_depth_map_' + str(i) + '.png')
+        # plt.pause(0.1)
+        # plt.show()
+        # plt.savefig('/home/shivendra/Downloads/relevant_depth_map_' + str(i) + '.png')
     return sorted(objects, key=lambda x: x['depth'])
 
 

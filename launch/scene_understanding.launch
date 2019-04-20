@@ -2,6 +2,6 @@
 
 <launch>
 
-    <node name="scene_understanding" pkg="scene_understanding" type="scene_understanding_wrapper.py" /> 
+    <node name="scene_understanding" pkg="scene_understanding" type="scene_understanding_wrapper.py" output="screen"/>
 
 </launch>
