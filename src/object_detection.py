@@ -211,6 +211,7 @@ def estimate_objects_distance(detected_objects, depth_map, depth_map_image = Fal
         # find a better depth estimate for the object
         relevant_depth_map = relevant_depth_map[relevant_depth_map > 10]
         new_obj['depth'] = relevant_depth_map.min()
+        new_obj['depth'] = new_obj['depth']/1000.0
         objects.append(new_obj.copy())
         # Uncomment to save each depth bounding box
         # plt.clf()
