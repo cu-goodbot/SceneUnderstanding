@@ -83,10 +83,10 @@ def draw_bounding_box(img_path):
     detections = detect_image(img, img_size, Tensor, model)
 
     # testers
-    print('detections: ', detections)
+    # print('detections: ', detections)
 
     inference_time = datetime.timedelta(seconds=time.time() - prev_time)
-    print('Inference Time: %s' % (inference_time))
+    # print('Inference Time: %s' % (inference_time))
 
     # Get bounding-box colors
     cmap = plt.get_cmap('jet')
@@ -151,7 +151,7 @@ def draw_bounding_box(img_path):
 
 
 # Function to estimate depths of all the found objects.
-def estimate_objects_distance(detected_objects, depth_map, depth_map_image = False, depth_scaling = 1.0):
+def estimate_objects_distance(detected_objects, depth_map, depth_map_image = False, depth_scaling = 0.001):
     '''
     :param detected_objects: List of dict with object name and diagonal coordinates
     :param depth_map: 2D depth array of the corresponding image
@@ -197,12 +197,14 @@ def estimate_objects_distance(detected_objects, depth_map, depth_map_image = Fal
         column_end = column_end if column_end > 0 else 0
 
         relevant_depth_map = depth_map_np[row_start:row_end, column_start:column_end]
-        print(obj)
-        print("Height = " + str(height), width)
-        print(int(height_ratio_with_rgb*(int(obj['tly']))),
-                                          int(height_ratio_with_rgb*(int(obj['bry']))),
-                             int(width_ratio_with_rgb*obj['tlx']),int(width_ratio_with_rgb*obj['brx']))
-        print(depth_map_np.shape)
+        # Some prints for debugging
+
+        # print(obj)
+        # print("Height = " + str(height), width)
+        # print(int(height_ratio_with_rgb*(int(obj['tly']))),
+        #                                   int(height_ratio_with_rgb*(int(obj['bry']))),
+        #                      int(width_ratio_with_rgb*obj['tlx']),int(width_ratio_with_rgb*obj['brx']))
+        # print(depth_map_np.shape)
         # print("path: ",relevant_depth_map)
 
         # If this is not good enough, we can use clustering to
