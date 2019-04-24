@@ -149,6 +149,55 @@ def draw_bounding_box(img_path):
 
     return detected_objects
 
+def draw_bounding_box_wo_plot(img_path):
+    global image_size
+
+    img_size, Tensor, model, classes = configuration()
+
+    prev_time = time.time()
+    # img = Image.open(img_path)
+    img = Image.fromarray(img_path)
+    image_size = img_path.shape
+    detections = detect_image(img, img_size, Tensor, model)
+
+    # testers
+    # print('detections: ', detections)
+
+    inference_time = datetime.timedelta(seconds=time.time() - prev_time)
+    # print('Inference Time: %s' % (inference_time))
+
+    img = np.array(img)
+
+    pad_x = max(img.shape[0] - img.shape[1], 0) * (img_size / max(img.shape))
+    pad_y = max(img.shape[1] - img.shape[0], 0) * (img_size / max(img.shape))
+    unpad_h = img_size - pad_y
+    unpad_w = img_size - pad_x
+
+    detected_objects = []
+
+    if detections is not None:
+        # browse detections and draw bounding boxes
+        i = 0
+        for x1, y1, x2, y2, conf, cls_conf, cls_pred in detections:
+            if i >= 0 and i <= 5:
+                y1 = ((y1 - pad_y // 2) / unpad_h) * img.shape[0]
+                x1 = ((x1 - pad_x // 2) / unpad_w) * img.shape[1]
+
+                y2 = ((y2 - pad_y // 2) / unpad_h) * img.shape[0]
+                x2 = ((x2 - pad_x // 2) / unpad_w) * img.shape[1]
+
+                obj = {}
+                obj['name'] = classes[int(cls_pred)]
+                # x,y points in the actual image, whatever resolution it has.
+                obj['tlx'] = x1
+                obj['tly'] = y1
+                obj['brx'] = x2
+                obj['bry'] = y2
+                detected_objects.append(obj)
+            i += 1
+
+    return detected_objects
+
 
 # Function to estimate depths of all the found objects.
 def estimate_objects_distance(detected_objects, depth_map, depth_map_image = False, depth_scaling = 0.001):
@@ -232,7 +281,7 @@ def obstacle_detector(image, depth_map, depth_scaling = 1.0):
     :param depth_scaling: Appropriate scaling factor for depth
     :return: List of dicts representing the detected obstacle in sorted order
     '''
-    detected_objs = draw_bounding_box(image)
+    detected_objs = draw_bounding_box_wo_plot(image)
 
     objects = estimate_objects_distance(detected_objs,
                                         depth_map,
