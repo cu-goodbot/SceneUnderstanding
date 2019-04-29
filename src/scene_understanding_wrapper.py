@@ -35,8 +35,8 @@ class SUWrapper(object):
         rospy.init_node('scene_understanding')
 
         # create publishers and subscribers
-        rospy.Subscriber('/kinect2/qhd/image_color', Image, self.rgb_image_cb)
-        rospy.Subscriber('/kinect2/sd/image_depth', Image, self.depth_image_cb)
+        # rospy.Subscriber('/kinect2/qhd/image_color', Image, self.rgb_image_cb)
+        # rospy.Subscriber('/kinect2/sd/image_depth', Image, self.depth_image_cb)
 
         pub = rospy.Publisher('/scene_info', Scene, queue_size=10)
 
@@ -48,6 +48,9 @@ class SUWrapper(object):
         # start update loop
         rate = rospy.Rate(UPDATE_RATE)
         while not rospy.is_shutdown():
+
+            self.recent_rgb = rospy.wait_for_message('/kinect2/qhd/image_color',Image)
+            self.recent_depth = rospy.wait_for_message('/kinect2/sd/image_depth',Image)
 
             if (self.recent_rgb is not None) and (self.recent_depth is not None):
 
