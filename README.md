@@ -4,10 +4,6 @@
 
 The scene understanding package for the GoodBot project for CSCI 7000. The package is composed of the Scene Understanding module, a ROS wrapper class, and custom ROS messages.
 
-## Scene Understanding Module
-
-Coming soon!
-
 ## ROS
 
 The ROS wrapper class handles subscribing and publishing to topics for scene and image data.
@@ -28,7 +24,7 @@ $ source <your workspace root>/devel/setup.bash
 ```
 then run
 ```
-$ roslaunch scene_understaning scene_understading.launch
+$ roslaunch scene_understanding scene_understanding.launch
 ```
 
 Check that scene information is being published to the `/scene_info` by running
